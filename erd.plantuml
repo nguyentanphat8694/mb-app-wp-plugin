@@ -1,0 +1,294 @@
+@startuml Marie Bridal Database
+
+' WordPress Core Tables
+entity "wp_users" {
+  * ID : bigint
+  --
+  * user_login : varchar
+  * user_pass : varchar
+  * user_nicename : varchar
+  * user_email : varchar
+  * user_url : varchar
+  * user_registered : datetime
+  * user_activation_key : varchar
+  * user_status : int
+  * display_name : varchar
+}
+
+entity "wp_usermeta" {
+  * umeta_id : bigint
+  --
+  * user_id : bigint
+  * meta_key : varchar
+  * meta_value : longtext
+}
+
+' Core Tables
+entity "mb_contracts" {
+  * id : int
+  --
+  * code : varchar
+  * type : varchar
+  * customer_id : int
+  * product_id : int
+  * start_date : date
+  * end_date : date
+  * deposit : decimal
+  * total : decimal
+  * status : varchar
+  note : text
+  * created_by : bigint
+  * updated_by : bigint
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "mb_products" {
+  * id : int
+  --
+  * code : varchar
+  * name : varchar
+  * category : varchar
+  * status : varchar
+  description : text
+  images : json
+  purchase_date : date
+  purchase_price : decimal
+  current_condition : varchar
+  last_maintenance : datetime
+  * created_by : bigint
+  * updated_by : bigint
+  created_at : datetime
+  updated_at : datetime
+}
+
+entity "mb_customers" {
+  * id : int
+  --
+  * name : varchar
+  * phone : varchar
+  email : varchar
+  source : varchar
+  * assigned_to : bigint
+  status : varchar
+  last_interaction : datetime
+  next_follow_up : datetime
+  * created_by : bigint
+  * updated_by : bigint
+  created_at : datetime
+  updated_at : datetime
+}
+
+' Staff Management Tables
+entity "mb_staff_attendance" {
+  * id : int
+  --
+  * user_id : bigint
+  * date : date
+  * check_in : datetime
+  check_out : datetime
+  * status : varchar
+  location : json
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_staff_tasks" {
+  * id : int
+  --
+  * user_id : bigint
+  * title : varchar
+  description : text
+  * due_date : datetime
+  * status : varchar
+  priority : varchar
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_staff_rewards" {
+  * id : int
+  --
+  * user_id : bigint
+  * type : varchar
+  * amount : decimal
+  reason : text
+  * status : varchar
+  * approved_by : bigint
+  approved_at : datetime
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_staff_schedules" {
+  * id : int
+  --
+  * user_id : bigint
+  * date : date
+  * shift : varchar
+  note : text
+  * created_by : bigint
+  created_at : datetime
+}
+
+' Appointment & Schedule Tables
+entity "mb_appointments" {
+  * id : int
+  --
+  * customer_id : int
+  * user_id : bigint
+  * date : datetime
+  * type : varchar
+  * status : varchar
+  note : text
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_product_bookings" {
+  * id : int
+  --
+  * product_id : int
+  * contract_id : int
+  * start_date : date
+  * end_date : date
+  note : text
+  * created_by : bigint
+  created_at : datetime
+}
+
+' History Tables
+entity "mb_product_history" {
+  * id : int
+  --
+  * product_id : int
+  * type : varchar
+  * status : varchar
+  note : text
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_customer_history" {
+  * id : int
+  --
+  * customer_id : int
+  * type : varchar
+  * status : varchar
+  note : text
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_contract_history" {
+  * id : int
+  --
+  * contract_id : int
+  * type : varchar
+  * status : varchar
+  note : text
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_product_maintenance" {
+  * id : int
+  --
+  * product_id : int
+  * type : varchar
+  * condition_before : varchar
+  * condition_after : varchar
+  cost : decimal
+  images : json
+  note : text
+  * created_by : bigint
+  created_at : datetime
+}
+
+entity "mb_customer_interactions" {
+  * id : int
+  --
+  * customer_id : int
+  * type : varchar
+  * channel : varchar
+  * status : varchar
+  content : text
+  result : varchar
+  next_action : varchar
+  next_date : datetime
+  * created_by : bigint
+  created_at : datetime
+}
+
+' Notification System
+entity "mb_notifications" {
+  * id : int
+  --
+  * type : varchar
+  * user_id : bigint
+  * title : varchar
+  * content : text
+  * data : json
+  * is_read : boolean
+  * channel : varchar
+  created_at : datetime
+  read_at : datetime
+}
+
+entity "mb_notification_settings" {
+  * id : int
+  --
+  * user_id : bigint
+  * type : varchar
+  * channel : varchar
+  * is_enabled : boolean
+  updated_at : datetime
+}
+
+entity "mb_notification_templates" {
+  * id : int
+  --
+  * type : varchar
+  * title_template : text
+  * content_template : text
+  * channels : json
+  * variables : json
+  updated_at : datetime
+}
+
+' Relationships
+wp_users ||--o{ wp_usermeta
+wp_users ||--o{ mb_staff_attendance
+wp_users ||--o{ mb_staff_tasks
+wp_users ||--o{ mb_staff_rewards
+wp_users ||--o{ mb_staff_schedules
+
+mb_appointments }|--|| mb_customers
+mb_appointments }|--|| wp_users
+mb_product_bookings }|--|| mb_products
+mb_product_bookings }|--|| mb_contracts
+
+mb_product_history }|--|| mb_products
+mb_customer_history }|--|| mb_customers
+mb_contract_history }|--|| mb_contracts
+mb_product_maintenance }|--|| mb_products
+mb_customer_interactions }|--|| mb_customers
+
+mb_contracts }|--|| mb_customers
+mb_contracts }|--|| mb_products
+
+mb_notifications }|--|| wp_users
+mb_notification_settings }|--|| wp_users
+
+mb_customers }|--|| wp_users : assigned_to
+mb_staff_tasks }|--|| wp_users : assigned_to
+
+' Created by relationships
+mb_product_history }|--|| wp_users : created_by
+mb_customer_history }|--|| wp_users : created_by
+mb_contract_history }|--|| wp_users : created_by
+mb_product_maintenance }|--|| wp_users : created_by
+mb_customer_interactions }|--|| wp_users : created_by
+mb_staff_rewards }|--|| wp_users : approved_by
+
+@enduml
